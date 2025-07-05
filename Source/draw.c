@@ -1,15 +1,30 @@
-//
-// Created by Segfault on 7/3/2025.
-//
-
 #include "draw.h"
 
+extern const int MAX_ROWS;
+extern const int MAX_COLS;
+
+
 void draw_state(gameboard* gamestate) {
+    printf("\033[H");
     printf("Press ESC to exit.\n");
-    for (int i = 0; i < MAX_ROWS; i++) {
-        for (int j = 0; j < MAX_COLS; j++) {
-            printf("   %c", gamestate->board[i][j]);
-        }
+
+    for (int i = 0; i < MAX_COLS*2+1; i++) {
+        printf("*");
     }
-    printf("\n WASD to move.");
+    printf("\n");
+    for (int i = 0; i < MAX_ROWS; i++) {
+        printf("*");
+        for (int j = 0; j < MAX_COLS; j++) {
+            if (j == 9) {
+                printf("%c", gamestate->board[i][j]);
+                continue;
+            }
+            printf("%c ", gamestate->board[i][j]);
+        }
+        printf("*\n");
+    }
+    for (int i = 0; i < MAX_COLS*2+1; i++) {
+        printf("*");
+    }
+    printf("\n A-D to move and Q-E to rotate pieces.");
 }

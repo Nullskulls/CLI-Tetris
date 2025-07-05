@@ -3,32 +3,89 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+char BLOCKS[7][4][4] = {
+    {
+        {' ', ' ', ' ', ' '},
+        {'@', '@', '@', '@'},
+        {' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' '}
+    },
+    {
+                {' ', '@', '@', ' '},
+                {' ', '@', '@', ' '},
+                {' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' '}
+    },
+    {
+                {' ', '@', ' ', ' '},
+                {'@', '@', '@', ' '},
+                {' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' '}
+    },
+    {
+                {' ', '@', '@', ' '},
+                {'@', '@', ' ', ' '},
+                {' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' '}
+    },
+    {
+                {'@', '@', ' ', ' '},
+                {' ', '@', '@', ' '},
+                {' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' '}
+    },
+    {
+                {'@', ' ', ' ', ' '},
+                {'@', '@', '@', ' '},
+                {' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' '}
+    },
+    {
+                {' ', ' ', '@', ' '},
+                {'@', '@', '@', ' '},
+                {' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' '}
+    }
+};
+
+extern const int MAX_ROWS;
+extern const int MAX_COLS;
+
+void wipe_board(gameboard* gamestate) {
+    for (int i = 0; i < MAX_ROWS; i++) {
+        for (int j = 0; j < MAX_COLS; j++) {
+            gamestate->board[i][j] = ' ';
+        }
+    }
+}
 
 /**
  * @brief Function used to initialize game state allocating memory in the heap for the game board and setting score and game over flag
  * @return gameboard
  */
-gameboard initialize_state() {
-    gameboard gamestate = malloc(sizeof(gameboard));
+gameboard* initialize_state() {
+    gameboard* gamestate = malloc(sizeof(gameboard));
     if (gamestate == NULL) {
         printf("malloc failed\n");
         Sleep(1000);
         exit(-1);
     }
+    gamestate->board = calloc(MAX_ROWS, sizeof(char*));
     for (int i = 0; i < MAX_ROWS; i++) {
-        gamestate.board[i] = calloc(MAX_COLS, sizeof(char));
-        if (gamestate.board[i] == NULL) {
+        gamestate->board[i] = calloc(MAX_COLS, sizeof(char));
+        if (gamestate->board[i] == NULL) {
             for (int j = 0; j < i; j++) {
-                free(gamestate.board[j]);
+                free(gamestate->board[j]);
             }
-            free(gamestate.board);
+            free(gamestate->board);
             printf("malloc failed\n");
             Sleep(1000);
             exit(-1);
         }
     }
-    gamestate.gameover = false;
-    gamestate.score = 0;
+    wipe_board(gamestate);
+    gamestate->gameover = false;
+    gamestate->score = 0;
     return gamestate;
 }
 /**
@@ -36,19 +93,40 @@ gameboard initialize_state() {
  *@brief Function used to shuffle the pieces for usage
  *@return void
  */
-void shuffle(int *array, size_t n){
-    if (n > 1)
-    {
-        size_t i;
-        for (i = 0; i < n - 1; i++)
-        {
-            size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
-            int t = array[j];
-            array[j] = array[i];
-            array[i] = t;
+
+void swap(char board[7][4][4], int i, int j) {
+    char temp[4][4];
+    for (int r = 0; r < 4; r++) {
+        for (int c = 0; c < 4; c++) {
+            temp[r][c] = board[j][r][c];
+        }
+    }
+    for (int r = 0; r < 4; r++) {
+        for (int c = 0; c < 4; c++) {
+            board[j][r][c] = board[i][r][c];
+        }
+    }
+    for (int r = 0; r < 4; r++) {
+        for (int c = 0; c < 4; c++) {
+            board[i][r][c] = temp[r][c];
         }
     }
 }
+
+void shuffle(char blocks[7][4][4]) {
+    int f = 0;
+    int j = 0;
+    for (int i = 0; i < 7; i++) {
+        while (f == j) {
+            f = rand() % 6;
+            j = rand() % 6;
+        }
+        swap(blocks, rand()%7, rand()%7);
+        f = rand() % 6;
+        j = rand() % 6;
+    }
+}
+
 
 /**
  * @details Function starts by seeding with the current time then uses modulo operator to get a random number from 0 to 4 which is then saved in the canvas pointer passed as a param
@@ -106,7 +184,7 @@ canvas* setup_canvas() {
  */
 void get_block(canvas* data) {
     if (data->iteration == -1) {
-        shuffle(BLOCKS, 7);
+        shuffle(BLOCKS);
         data->iteration++;
         get_block(data);
     }
@@ -114,7 +192,7 @@ void get_block(canvas* data) {
         data->iteration = -1;
         get_block(data);
     }
-    else if (data->iteration < 1) {
+    else if (data->iteration < 0) {
         data->iteration = -1;
         get_block(data);
     }
@@ -124,6 +202,7 @@ void get_block(canvas* data) {
                 data->piece[i][j] = BLOCKS[data->iteration][i][j];
             }
        }
+        rotate(data);
         data->iteration++;
     }
 }
@@ -133,6 +212,7 @@ void get_block(canvas* data) {
  * @param canvas
  */
 void rotate(canvas* canvas) {
+    get_rotation(canvas);
     char** piece = malloc(sizeof(char*)*4);
     if (piece == NULL) {
         printf("malloc failed\n");
@@ -151,24 +231,33 @@ void rotate(canvas* canvas) {
             exit(-1);
         }
     }
-    for (int r = 0; r < canvas->rotation; r++) {
+    if (canvas->rotation == 1) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                piece[i][j] = canvas->piece[j][i];
+                piece[i][j] = canvas->piece[3-j][i];
             }
         }
-        if (canvas->rotation == 1) {
-            break;
+    }else if (canvas->rotation == 2) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                piece[i][j] = canvas->piece[i][3-j];
+            }
         }
+    }else if (canvas->rotation == 3) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                piece[i][j] = canvas->piece[3-i][3-i];
+            }
+        }
+    }
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 canvas->piece[j][i] = piece[i][j];
             }
         }
-    }
 
-    for (int i = 0; i < 4; i++) {
-        free(canvas->piece[i]);
+    for(int j = 0; j < 4; j++){
+        free(canvas->piece[j]);
     }
     free(canvas->piece);
     canvas->piece=piece;
