@@ -28,3 +28,11 @@ void draw_state(gameboard* gamestate) {
     }
     printf("\n A-D to move and Q-E to rotate pieces.");
 }
+void draw_canvas(canvas* canvas) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            printf("%c", canvas->piece[i][j]);
+        }
+        printf("\n");
+    }
+}

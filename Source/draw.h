@@ -8,5 +8,6 @@
 #include <stdio.h>
 
 void draw_state(gameboard* gamestate);
+void draw_canvas(canvas* canvas);
 
 #endif //DRAW_H

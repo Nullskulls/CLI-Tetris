@@ -213,54 +213,54 @@ void get_block(canvas* data) {
  */
 void rotate(canvas* canvas) {
     get_rotation(canvas);
-    char** piece = malloc(sizeof(char*)*4);
+    char** piece = calloc(4, sizeof(char*));
     if (piece == NULL) {
         printf("malloc failed\n");
         Sleep(1000);
         exit(-1);
     }
+
     for (int i = 0; i < 4; i++) {
-        piece[i] = malloc(sizeof(char)*4);
+        piece[i] = calloc(4, sizeof(char));
         if (piece[i] == NULL) {
             printf("malloc failed\n");
             for (int j = 0; j < i; j++) {
                 free(piece[j]);
             }
-            free(piece);
-            Sleep(1000);
-            exit(-1);
         }
     }
-    if (canvas->rotation == 1) {
+
+    if (canvas -> rotation == 1) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                piece[i][j] = canvas->piece[j][3-i];
+                piece[j][3-i] = canvas->piece[i][j];
             }
         }
-    }else if (canvas->rotation == 2) {
+    }else if (canvas -> rotation == 2) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                piece[i][j] = canvas->piece[3-i][j];
+                piece[3-j][i] = canvas->piece[i][j];
             }
         }
-    }else if (canvas->rotation == 3) {
+    }else if (canvas -> rotation == 3) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                piece[i][j] = canvas->piece[i][3-i];
+                piece[3-j][3-i] = canvas->piece[i][j];
             }
         }
+    }else {
+        for (int i = 0; i < 4; i++) {
+            free(piece[i]);
+        }
+        free(piece);
+        return;
     }
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                canvas->piece[j][i] = piece[i][j];
-            }
-        }
 
     for(int j = 0; j < 4; j++){
         free(canvas->piece[j]);
     }
     free(canvas->piece);
-    canvas->piece=piece;
+    canvas->piece = piece;
 
 }
 

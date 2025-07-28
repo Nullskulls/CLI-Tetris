@@ -9,6 +9,11 @@
 extern const int MAX_ROWS;
 extern const int MAX_COLS;
 
+typedef struct {
+    int min_i;
+    int min_j;
+}border;
+
 void move_pieces(int direction, gameboard* gamestate);
 bool is_valid_move(int direction, gameboard* gamestate);
 bool is_free_right(gameboard* gamestate);
