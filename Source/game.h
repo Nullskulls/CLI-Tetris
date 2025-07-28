@@ -21,5 +21,6 @@ bool is_droppable(gameboard* gamestate);
 void place_block(const canvas* canvas, gameboard* gamestate);
 bool is_valid(const canvas* canvas, gameboard* gamestate);
 void* drop(gameboard* gamestate);
+void rotate_piece(gameboard* gamestate, int direction);
 
 #endif //GAME_H

@@ -31,6 +31,8 @@ int get_input(){
         switch (key) {
             case 'a': return 1;
             case 'd': return 2;
+            case 'q': return 3;
+            case 'e': return 4;
             case 27: {
             }
             default: return 0;
@@ -56,6 +58,8 @@ int get_input_blocking(void) {
     switch (key) {
         case 'a': return 1;
         case 'd': return 2;
+        case 'q': return 3;
+        case 'e': return 4;
         case 27:  return 5;
         default: return 0;
     }
@@ -155,11 +159,109 @@ void drop_pieces(gameboard* gamestate) {
         }
     }
 }
-bool is_rotatable(gameboard* gamestate, int direction) {
-    if (direction == 3) {
-        //TODO: To be added
 
+void rotate_piece(gameboard* gamestate, int direction) {
+    paused = 1;
+    canvas* canvas = calloc(1, sizeof(canvas));
+    if (canvas == NULL) {
+        printf("malloc failed.");
+        Sleep(1000);
+        exit(-1);
     }
+    canvas->piece = calloc(4, sizeof(char*));
+    for (int i = 0; i < 4; i++) {
+        canvas->piece[i] = calloc(MAX_COLS, sizeof(char));
+    }
+    int min_i=19;
+    int min_j=9;
+    canvas->rotation = direction-2;
+    for (int i = 0; i < MAX_ROWS; i++) {
+        for (int j = 0; j < MAX_COLS; j++) {
+            if (gamestate->board[i][j] == '@') {
+                if (i < min_i) {
+                    min_i = i;
+                }
+                if (j < min_j) {
+                    min_j = j;
+                }
+            }
+        }
+    }
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            canvas->piece[i][j] = '0';
+        }
+    }
+    for (int i = 0; i < MAX_ROWS; i++) {
+        for (int j = 0; j < MAX_COLS; j++) {
+            if (gamestate->board[i][j] == '@') {
+                canvas->piece[i-min_i][j-min_j] = '@';
+            }
+        }
+    }
+    rotate(canvas);
+    char** temp_board = malloc(sizeof(char*)* MAX_ROWS);
+    if (temp_board == NULL) {
+        printf("malloc failed.");
+        Sleep(1000);
+        exit(-1);
+    }
+    for (int i = 0; i < MAX_ROWS; i++) {
+        temp_board[i] = malloc(sizeof(char) * MAX_COLS);
+    }
+    for (int i = 0; i < MAX_ROWS; i++) {
+        for (int j = 0; j < MAX_COLS; j++) {
+            if (gamestate->board[i][j] == '@') {
+                temp_board[i][j] = ' ';
+                continue;
+            }
+            temp_board[i][j] = gamestate->board[i][j];
+        }
+    }
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (canvas->piece[i][j] == '@') {
+                if (min_i+i >= MAX_ROWS && min_j+j >= MAX_COLS) {
+                    for (int f = 0; f < MAX_ROWS; f++) {
+                        free(gamestate->board[f]);
+                    }
+                    free(gamestate->board);
+                    gamestate->board = temp_board;
+                    for (int f = 0; f < 4; f++) {
+                        free(canvas->piece[f]);
+                    }
+                    free(canvas->piece);
+                    free(canvas);
+                    return;
+                }
+                if (temp_board[min_i+i][min_j+j] == ' ') {
+                    temp_board[min_i+i][min_j+j] = '@';
+                    continue;
+                }
+                for (int f = 0; f < MAX_ROWS; f++) {
+                    free(gamestate->board[f]);
+                }
+                free(gamestate->board);
+                gamestate->board = temp_board;
+                for (int f = 0; f < 4; f++) {
+                    free(canvas->piece[f]);
+                }
+                free(canvas->piece);
+                free(canvas);
+                return;
+            }
+        }
+    }
+    for (int i = 0; i < MAX_ROWS; i++) {
+        free(gamestate->board[i]);
+    }
+    free(gamestate->board);
+    gamestate->board = temp_board;
+    for (int i = 0; i < 4; i++) {
+        free(canvas->piece[i]);
+    }
+    free(canvas->piece);
+    paused = 0;
 }
 
 void* drop(gameboard* gamestate) {

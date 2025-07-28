@@ -27,6 +27,7 @@ canvas* setup_canvas();
 void shuffle(char blocks[7][4][4]);
 gameboard* initialize_state();
 void rotate(canvas* canvas);
+void wipe_board(gameboard* gamestate);
 
 
 

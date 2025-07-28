@@ -11,9 +11,9 @@ char BLOCKS[7][4][4] = {
         {' ', ' ', ' ', ' '}
     },
     {
-                {' ', '@', '@', ' '},
-                {' ', '@', '@', ' '},
                 {' ', ' ', ' ', ' '},
+                {' ', '@', '@', ' '},
+                {' ', '@', '@', ' '},
                 {' ', ' ', ' ', ' '}
     },
     {
@@ -23,15 +23,15 @@ char BLOCKS[7][4][4] = {
                 {' ', ' ', ' ', ' '}
     },
     {
+                {' ', ' ', ' ', ' '},
                 {' ', '@', '@', ' '},
                 {'@', '@', ' ', ' '},
-                {' ', ' ', ' ', ' '},
                 {' ', ' ', ' ', ' '}
     },
     {
-                {'@', '@', ' ', ' '},
-                {' ', '@', '@', ' '},
                 {' ', ' ', ' ', ' '},
+                {' ', '@', '@', ' '},
+                {' ', ' ', '@', '@'},
                 {' ', ' ', ' ', ' '}
     },
     {
@@ -234,19 +234,19 @@ void rotate(canvas* canvas) {
     if (canvas->rotation == 1) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                piece[i][j] = canvas->piece[3-j][i];
+                piece[i][j] = canvas->piece[j][3-i];
             }
         }
     }else if (canvas->rotation == 2) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                piece[i][j] = canvas->piece[i][3-j];
+                piece[i][j] = canvas->piece[3-i][j];
             }
         }
     }else if (canvas->rotation == 3) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                piece[i][j] = canvas->piece[3-i][3-i];
+                piece[i][j] = canvas->piece[i][3-i];
             }
         }
     }

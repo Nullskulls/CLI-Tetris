@@ -16,8 +16,12 @@ int main(void) {
     start_drop_thread(gamestate);
     while (true) {
         if (kbhit() || true) {
-            int input = get_input_blocking();
-            move_pieces(input, gamestate);
+            int input = get_input();
+            if (input == 1 || input == 2) {
+                move_pieces(input, gamestate);
+            }else if (input == 3 || input == 4) {
+                rotate_piece(gamestate, input);
+            }
             Sleep(100);
             draw_state(gamestate);
         }
