@@ -247,7 +247,7 @@ void rotate_piece(gameboard* gamestate, int rotation) {
         return;
     }
     canvas->piece = rotated_piece;
-    canvas->rotation = rotation;
+    canvas->rotation = rotation-2;
     canvas->iteration = 0;
     rotated_piece = NULL;
     //now to pass it off to our helper func to be rotated
@@ -312,13 +312,79 @@ void rotate_piece(gameboard* gamestate, int rotation) {
     paused = 0;
 }
 
+bool is_clear(gameboard* gamestate) {
+    for (int i = 0; i < MAX_ROWS; i++) {
+        for (int j = 0; j < MAX_COLS; j++) {
+            if (gamestate->board[i][j] == '@') {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool line_is_clearable(gameboard* gamestate, int index) {
+    for (int i = 0; i < MAX_COLS; i++) {
+        if (gamestate->board[index][i] != '#') {
+            return false;
+        }
+    }
+    return true;
+}
+
+void clear_line(gameboard* gamestate, int index) {
+    for (int i = 0; i < MAX_COLS; i++) {
+        gamestate->board[index][i] = ' ';
+    }
+}
+
+void* clear_lines(gameboard* gamestate) {
+    for (int i = MAX_ROWS-1; i > -1; i--) {
+        if (line_is_clearable(gamestate, i)) {
+            clear_line(gamestate, i);
+        }
+    }
+}
+bool is_hovering(gameboard* gamestate, int index) {
+    for (int i = 0; i < MAX_COLS; i++) {
+        if (gamestate->board[index][i] == '#') {
+            if (index+1 < MAX_ROWS && gamestate->board[index+1][i] != ' ' || index + 1 >= MAX_ROWS) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void drop_line(gameboard* gamestate, int index) {
+    for (int i = 0; i < MAX_COLS; i++) {
+        if (gamestate->board[index][i] == '#') {
+            gamestate->board[index][i] = ' ';
+            gamestate->board[index+1][i] = '#';
+        }
+    }
+}
+void drop_hovering(gameboard* gamestate) {
+    for (int i = MAX_ROWS-1; i > -1; i--) {
+        if (is_hovering(gamestate, i)) {
+            drop_line(gamestate, i);
+        }
+    }
+}
 void* drop(gameboard* gamestate) {
+    canvas* canvas = setup_canvas(gamestate);
     while (!gamestate->gameover) {
         if (paused == 1) continue;
+        clear_lines(gamestate);
+        drop_hovering(gamestate);
+        if (is_clear(gamestate)) {
+            get_block(canvas);
+            place_block(canvas, gamestate);
+        }
         dropping = 1;
         drop_pieces(gamestate);
         dropping = 0;
-        Sleep(700);
+        Sleep(300);
     }
     return NULL;
 }
