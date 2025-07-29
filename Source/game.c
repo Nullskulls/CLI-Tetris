@@ -17,10 +17,33 @@ bool is_valid(const canvas* canvas, gameboard* gamestate) {
     return true;
 }
 
-void place_block(const canvas* canvas, gameboard* gamestate) {
+bool is_placeable(const canvas* canvas, gameboard* gamestate) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            if (canvas->piece[i][j] == 0) continue;
+            if (canvas->piece[i][j] == '@') {
+                if (gamestate->board[i+3][j] != '0') {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+void place_block(const canvas* canvas, gameboard* gamestate) {
+    if (is_placeable(canvas, gamestate)) {
+        gamestate->gameover = true;
+        system("cls");
+        for (int i = 0; i < MAX_COLS; i++) {
+            free(gamestate->board[i]);
+        }
+        free(gamestate->board);
+        exit(1);
+        return;
+    }
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (canvas->piece[i][j] == '0') continue;
             gamestate->board[i][j+3] = canvas->piece[i][j];
         }
     }
@@ -332,16 +355,18 @@ bool line_is_clearable(gameboard* gamestate, int index) {
     return true;
 }
 
-void clear_line(gameboard* gamestate, int index) {
+void clear_line(gameboard* gamestate, int index, char letter) {
     for (int i = 0; i < MAX_COLS; i++) {
-        gamestate->board[index][i] = ' ';
+        gamestate->board[index][i] = letter;
     }
 }
 
 void* clear_lines(gameboard* gamestate) {
     for (int i = MAX_ROWS-1; i > -1; i--) {
         if (line_is_clearable(gamestate, i)) {
-            clear_line(gamestate, i);
+            clear_line(gamestate, i, '.');
+            Sleep(325);
+            clear_line(gamestate, i, ' ');
         }
     }
 }
@@ -371,17 +396,17 @@ void drop_hovering(gameboard* gamestate) {
         }
     }
 }
-void* drop(gameboard* gamestate) {
+void* drop(gameboard* gamestate){
     canvas* canvas = setup_canvas(gamestate);
     while (!gamestate->gameover) {
         if (paused == 1) continue;
+        dropping = 1;
         clear_lines(gamestate);
         drop_hovering(gamestate);
         if (is_clear(gamestate)) {
             get_block(canvas);
             place_block(canvas, gamestate);
         }
-        dropping = 1;
         drop_pieces(gamestate);
         dropping = 0;
         Sleep(300);

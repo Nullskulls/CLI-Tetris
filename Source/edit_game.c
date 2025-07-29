@@ -246,7 +246,7 @@ void rotate(canvas* canvas) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 piece[3-j][3-i] = canvas->piece[i][j];
-            }
+            }   
         }
     }else {
         for (int i = 0; i < 4; i++) {
