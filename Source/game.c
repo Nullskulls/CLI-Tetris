@@ -2,8 +2,8 @@
 
 const int MAX_ROWS = 20;
 const int MAX_COLS = 10;
-int paused = 0;
-int dropping = 0;
+volatile int paused = 0;
+volatile int dropping = 0;
 bool is_valid(const canvas* canvas, gameboard* gamestate) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
@@ -427,6 +427,18 @@ void* drop(gameboard* gamestate){
         drop_pieces(gamestate);
         dropping = 0;
         Sleep(300);
+    }
+    // Cleanup canvas before exiting
+    if (canvas != NULL) {
+        for (int i = 0; i < 4; i++) {
+            if (canvas->piece[i] != NULL) {
+                free(canvas->piece[i]);
+            }
+        }
+        if (canvas->piece != NULL) {
+            free(canvas->piece);
+        }
+        free(canvas);
     }
     return NULL;
 }

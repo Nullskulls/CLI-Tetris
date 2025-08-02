@@ -135,6 +135,7 @@ void shuffle(char blocks[7][4][4]) {
  * @param canvas
  */
 void get_rotation(canvas* canvas) {
+    if (canvas == NULL) return;
     srand(time(NULL));
     canvas->rotation = rand()%4;
 }
@@ -184,25 +185,28 @@ canvas* setup_canvas(gameboard* gamestate) {
  * @param data
  */
 void get_block(canvas* data) {
+    if (data == NULL || data->piece == NULL) return;
+    
     if (data->iteration == -1) {
         shuffle(BLOCKS);
-        data->iteration++;
-        get_block(data);
+        data->iteration = 0;
     }
-    else if (data->iteration > 7) {
+    else if (data->iteration >= 7) {
         data->iteration = -1;
-        get_block(data);
+        shuffle(BLOCKS);
+        data->iteration = 0;
     }
-    else if (data->iteration < 0) {
-        data->iteration = -1;
-        get_block(data);
+    else if (data->iteration < -1) {
+        data->iteration = 0;
     }
-    else {
-       for (int i =0; i < 4; i++){
+    
+    // Ensure iteration is within valid bounds
+    if (data->iteration >= 0 && data->iteration < 7) {
+        for (int i = 0; i < 4; i++){
             for (int j = 0; j < 4; j++) {
                 data->piece[i][j] = BLOCKS[data->iteration][i][j];
             }
-       }
+        }
         rotate(data);
         data->iteration++;
     }
@@ -213,6 +217,8 @@ void get_block(canvas* data) {
  * @param canvas
  */
 void rotate(canvas* canvas) {
+    if (canvas == NULL || canvas->piece == NULL) return;
+    
     get_rotation(canvas);
     char** piece = calloc(4, sizeof(char*));
     if (piece == NULL) {
