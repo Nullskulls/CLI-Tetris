@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/CLI_Tetris.dir/link.d CMakeFiles/CLI_Tetris.dir/Source/main.c.o CMakeFiles/CLI_Tetris.dir/Source/game.c.o CMakeFiles/CLI_Tetris.dir/Source/edit_game.c.o CMakeFiles/CLI_Tetris.dir/Source/draw.c.o CMakeFiles/CLI_Tetris.dir/Source/threading.c.o -o CLI_Tetris
