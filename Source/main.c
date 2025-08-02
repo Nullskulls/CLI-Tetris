@@ -21,6 +21,12 @@ int main(void) {
                 move_pieces(input, gamestate);
             }else if (input == 3 || input == 4) {
                 rotate_piece(gamestate, input);
+            }else if (input == 5) {
+                for (int i = 0; i < MAX_ROWS; i++) {
+                    free(gamestate->board[i]);
+                }
+                free(gamestate->board);
+                exit(0);
             }
             Sleep(100);
             draw_state(gamestate);

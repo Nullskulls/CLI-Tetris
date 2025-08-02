@@ -58,6 +58,7 @@ int get_input(){
             case 'q': return 3;
             case 'e': return 4;
             case 27: {
+                return 5;
             }
             default: return 0;
         }
