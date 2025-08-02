@@ -1,0 +1,3 @@
+/home/runner/work/CLI-Tetris/CLI-Tetris/build/CMakeFiles/CLI_Tetris.dir
+/home/runner/work/CLI-Tetris/CLI-Tetris/build/CMakeFiles/edit_cache.dir
+/home/runner/work/CLI-Tetris/CLI-Tetris/build/CMakeFiles/rebuild_cache.dir
