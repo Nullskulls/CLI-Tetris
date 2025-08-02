@@ -145,7 +145,7 @@ void get_rotation(canvas* canvas) {
  * @brief Function used to set up the canvas in the heap.
  * @return canvas*
  */
-canvas* setup_canvas() {
+canvas* setup_canvas(gameboard* gamestate) {
     canvas* canvas = malloc(sizeof(canvas));
     if (canvas == NULL) {
         printf("malloc failed\n");
@@ -172,6 +172,7 @@ canvas* setup_canvas() {
             exit(-1);
         }
     }
+    canvas->iteration = 0;  // Initialize iteration
     get_block(canvas);
     return canvas;
 }
@@ -227,6 +228,9 @@ void rotate(canvas* canvas) {
             for (int j = 0; j < i; j++) {
                 free(piece[j]);
             }
+            free(piece);
+            Sleep(1000);
+            exit(-1);
         }
     }
 

@@ -8,7 +8,7 @@ bool is_valid(const canvas* canvas, gameboard* gamestate) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (canvas->piece[i][j] == 0) continue;
-            if (gamestate->board[i][j+3] != 0) {
+            if (j+3 >= MAX_COLS || i >= MAX_ROWS || gamestate->board[i][j+3] != 0) {
                 gamestate->gameover = true;
                 return false;
             }
@@ -21,7 +21,12 @@ bool is_placeable(const canvas* canvas, gameboard* gamestate) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (canvas->piece[i][j] == '@') {
-                if (gamestate->board[i+3][j] != '0') {
+                int board_row = i + 3;
+                int board_col = j;
+                if (board_row >= MAX_ROWS || board_col >= MAX_COLS || board_row < 0 || board_col < 0) {
+                    return false;
+                }
+                if (gamestate->board[board_row][board_col] != ' ') {
                     return false;
                 }
             }
@@ -31,10 +36,10 @@ bool is_placeable(const canvas* canvas, gameboard* gamestate) {
 }
 
 void place_block(const canvas* canvas, gameboard* gamestate) {
-    if (is_placeable(canvas, gamestate)) {
+    if (!is_placeable(canvas, gamestate)) {
         gamestate->gameover = true;
         system("cls");
-        for (int i = 0; i < MAX_COLS; i++) {
+        for (int i = 0; i < MAX_ROWS; i++) {
             free(gamestate->board[i]);
         }
         free(gamestate->board);
@@ -43,8 +48,13 @@ void place_block(const canvas* canvas, gameboard* gamestate) {
     }
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            if (canvas->piece[i][j] == '0') continue;
-            gamestate->board[i][j+3] = canvas->piece[i][j];
+            if (canvas->piece[i][j] != ' ' && canvas->piece[i][j] != 0) {
+                int board_row = i + 3;
+                int board_col = j;
+                if (board_row < MAX_ROWS && board_col < MAX_COLS && board_row >= 0 && board_col >= 0) {
+                    gamestate->board[board_row][board_col] = canvas->piece[i][j];
+                }
+            }
         }
     }
 }
@@ -92,7 +102,7 @@ bool is_free_left(gameboard* gamestate) {
     for (int i = 0; i < MAX_ROWS; i++) {
         for (int j = 0; j < MAX_COLS; j++) {
             if (gamestate->board[i][j] == '@') {
-                if (gamestate->board[i][j-1] != ' ' && gamestate->board[i][j-1] != '@') return false;
+                if (j <= 0 || (gamestate->board[i][j-1] != ' ' && gamestate->board[i][j-1] != '@')) return false;
             }
         }
     }
@@ -104,7 +114,7 @@ bool is_free_right(gameboard* gamestate) {
     for (int i = 0; i < MAX_ROWS; i++) {
         for (int j = 0; j < MAX_COLS; j++) {
             if (gamestate->board[i][j] == '@') {
-                if (gamestate->board[i][j+1] != ' ' && gamestate->board[i][j+1] != '@') return false;
+                if (j >= MAX_COLS-1 || (gamestate->board[i][j+1] != ' ' && gamestate->board[i][j+1] != '@')) return false;
             }
         }
     }
@@ -155,7 +165,7 @@ bool is_droppable(gameboard* gamestate) {
     for (int i = MAX_ROWS-1; i > -1; i--) {
         for (int j = MAX_COLS-1; j > -1; j--) {
             if (gamestate->board[i][j] == '@') {
-                if (i >= 19) return false;
+                if (i >= MAX_ROWS-1) return false;
                 if (!(gamestate->board[i+1][j] == ' ' || gamestate->board[i+1][j] == '@')) return false;
             }
         }
@@ -316,14 +326,17 @@ void rotate_piece(gameboard* gamestate, int rotation) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (canvas->piece[i][j] == '@') {
-                if (i+borders->min_i >= MAX_ROWS || j+borders->min_j >= MAX_COLS || temp_board[i+borders->min_i][j+borders->min_j] != ' ') {
+                int new_i = i + borders->min_i;
+                int new_j = j + borders->min_j;
+                if (new_i >= MAX_ROWS || new_j >= MAX_COLS || new_i < 0 || new_j < 0 || temp_board[new_i][new_j] != ' ') {
                     free_rotated(canvas->piece);
                     free(borders);
                     free_board(temp_board);
+                    free(canvas);
                     paused = 0;
                     return;
-                }else {
-                    temp_board[i+borders->min_i][j+borders->min_j] = '@';
+                } else {
+                    temp_board[new_i][new_j] = '@';
                 }
             }
         }
@@ -347,6 +360,7 @@ bool is_clear(gameboard* gamestate) {
 }
 
 bool line_is_clearable(gameboard* gamestate, int index) {
+    if (index < 0 || index >= MAX_ROWS) return false;
     for (int i = 0; i < MAX_COLS; i++) {
         if (gamestate->board[index][i] != '#') {
             return false;
@@ -356,6 +370,7 @@ bool line_is_clearable(gameboard* gamestate, int index) {
 }
 
 void clear_line(gameboard* gamestate, int index, char letter) {
+    if (index < 0 || index >= MAX_ROWS) return;
     for (int i = 0; i < MAX_COLS; i++) {
         gamestate->board[index][i] = letter;
     }
@@ -371,9 +386,10 @@ void* clear_lines(gameboard* gamestate) {
     }
 }
 bool is_hovering(gameboard* gamestate, int index) {
+    if (index < 0 || index >= MAX_ROWS) return false;
     for (int i = 0; i < MAX_COLS; i++) {
         if (gamestate->board[index][i] == '#') {
-            if (index+1 < MAX_ROWS && gamestate->board[index+1][i] != ' ' || index + 1 >= MAX_ROWS) {
+            if ((index+1 < MAX_ROWS && gamestate->board[index+1][i] != ' ') || index + 1 >= MAX_ROWS) {
                 return false;
             }
         }
@@ -382,6 +398,7 @@ bool is_hovering(gameboard* gamestate, int index) {
 }
 
 void drop_line(gameboard* gamestate, int index) {
+    if (index < 0 || index >= MAX_ROWS - 1) return;
     for (int i = 0; i < MAX_COLS; i++) {
         if (gamestate->board[index][i] == '#') {
             gamestate->board[index][i] = ' ';

@@ -23,7 +23,7 @@ typedef struct {
 }canvas;
 
 void get_block(canvas* data);
-canvas* setup_canvas();
+canvas* setup_canvas(gameboard* gamestate);
 void shuffle(char blocks[7][4][4]);
 gameboard* initialize_state();
 void rotate(canvas* canvas);
