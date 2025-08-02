@@ -255,8 +255,12 @@ void rotate_piece(gameboard* gamestate, int rotation) {
     for (int i = 0; i < MAX_ROWS; i++) {
         for (int j = 0; j < MAX_COLS; j++) {
             if (gamestate->board[i][j] == '@') {
-                if (rotated_piece[i-borders->min_i][j-borders->min_j] == ' ') {
-                    rotated_piece[i-borders->min_i][j-borders->min_j] = '@';
+                int piece_row = i - borders->min_i;
+                int piece_col = j - borders->min_j;
+                if (piece_row >= 0 && piece_row < 4 && piece_col >= 0 && piece_col < 4) {
+                    if (rotated_piece[piece_row][piece_col] == ' ') {
+                        rotated_piece[piece_row][piece_col] = '@';
+                    }
                 }
             }
         }
@@ -294,6 +298,7 @@ void rotate_piece(gameboard* gamestate, int rotation) {
             for (int j = 0; j < i; j++) {
                 free(temp_board[j]);
             }
+            free(temp_board);
             paused = 0;
             return;
         }
@@ -319,6 +324,7 @@ void rotate_piece(gameboard* gamestate, int rotation) {
                 if (i+borders->min_i >= MAX_ROWS || j+borders->min_j >= MAX_COLS || temp_board[i+borders->min_i][j+borders->min_j] != ' ') {
                     free_rotated(canvas->piece);
                     free(borders);
+                    free(canvas);
                     free_board(temp_board);
                     paused = 0;
                     return;
@@ -330,6 +336,7 @@ void rotate_piece(gameboard* gamestate, int rotation) {
     }
     free_rotated(canvas->piece);
     free(borders);
+    free(canvas);
     free_board(gamestate->board);
     gamestate->board = temp_board;
     paused = 0;

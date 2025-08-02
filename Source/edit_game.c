@@ -227,6 +227,9 @@ void rotate(canvas* canvas) {
             for (int j = 0; j < i; j++) {
                 free(piece[j]);
             }
+            free(piece);
+            Sleep(1000);
+            exit(-1);
         }
     }
 
