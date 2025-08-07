@@ -263,35 +263,35 @@ void rotate_piece(gameboard* gamestate, int rotation) {
         }
     }
     //initialize a canvas
-    canvas* canvas = malloc(sizeof(canvas));
-    if (canvas == NULL) {
+    canvas* canva = malloc(sizeof(canvas));
+    if (canva == NULL) {
         free_rotated(rotated_piece);
         free(borders);
         paused=0;
         return;
     }
-    canvas->piece = rotated_piece;
-    canvas->rotation = rotation-2;
-    canvas->iteration = 0;
+    canva->piece = rotated_piece;
+    canva->rotation = rotation-2;
+    canva->iteration = 0;
     rotated_piece = NULL;
     //now to pass it off to our helper func to be rotated
-    rotate(canvas);
+    rotate(canva);
     //first we copy the board to a holder board
     //initializing
     char** temp_board = calloc(MAX_ROWS, sizeof(char*));
     if (temp_board == NULL) {
-        free_rotated(canvas->piece);
+        free_rotated(canva->piece);
         free(borders);
-        free(canvas);
+        free(canva);
         paused = 0;
         return;
     }
     for (int i = 0; i < MAX_ROWS; i++) {
         temp_board[i] = calloc(MAX_COLS, sizeof(char));
         if (temp_board[i] == NULL) {
-            free_rotated(canvas->piece);
+            free_rotated(canva->piece);
             free(borders);
-            free(canvas);
+            free(canva);
             for (int j = 0; j < i; j++) {
                 free(temp_board[j]);
             }
@@ -316,9 +316,9 @@ void rotate_piece(gameboard* gamestate, int rotation) {
     //now to place it back on the board adjusted
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            if (canvas->piece[i][j] == '@') {
+            if (canva->piece[i][j] == '@') {
                 if (i+borders->min_i >= MAX_ROWS || j+borders->min_j >= MAX_COLS || temp_board[i+borders->min_i][j+borders->min_j] != ' ') {
-                    free_rotated(canvas->piece);
+                    free_rotated(canva->piece);
                     free(borders);
                     free_board(temp_board);
                     paused = 0;
@@ -329,7 +329,7 @@ void rotate_piece(gameboard* gamestate, int rotation) {
             }
         }
     }
-    free_rotated(canvas->piece);
+    free_rotated(canva->piece);
     free(borders);
     free_board(gamestate->board);
     gamestate->board = temp_board;
