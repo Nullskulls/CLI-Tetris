@@ -21,7 +21,7 @@ bool is_placeable(const canvas* canvas, gameboard* gamestate) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (canvas->piece[i][j] == '@') {
-                if (gamestate->board[i][j+3] != '0') {
+                if (gamestate->board[i][j+3] != ' ') {
                     return false;
                 }
             }
@@ -31,7 +31,7 @@ bool is_placeable(const canvas* canvas, gameboard* gamestate) {
 }
 
 void place_block(const canvas* canvas, gameboard* gamestate) {
-    if (is_placeable(canvas, gamestate)) {
+    if (!is_placeable(canvas, gamestate)) {
         gamestate->gameover = true;
         system("cls");
         for (int i = 0; i < MAX_COLS; i++) {
@@ -40,7 +40,6 @@ void place_block(const canvas* canvas, gameboard* gamestate) {
         free(gamestate->board);
         system("cls");
         printf("GAME OVER\n");
-        Sleep(2000);
         exit(5);
     }
     for (int i = 0; i < 4; i++) {
